@@ -1,21 +1,13 @@
 from ibm_watson import ToneAnalyzerV3
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from dotenv import load_dotenv
-load_dotenv()
 import os
 import numpy as np
+import time
+
+load_dotenv()
 
 IBM_API_KEY = os.environ['IBM_API_KEY']
-
-authenticator = IAMAuthenticator(IBM_API_KEY)
-tone_analyzer = ToneAnalyzerV3(
-    version='2020-02-25',
-    authenticator=authenticator
-)
-
-tone_analyzer.set_service_url('https://api.us-south.tone-analyzer.watson.cloud.ibm.com/instances/421d8d20-ab81-4291-a7ba-0e37f6cbf9de')
-
-import time
 
 def get(raw_text):
     """
@@ -27,6 +19,12 @@ def get(raw_text):
     Returns:
         Raw API response object on success. Error on failure.
     """
+    authenticator = IAMAuthenticator(IBM_API_KEY)
+    tone_analyzer = ToneAnalyzerV3(
+        version='2020-02-25',
+        authenticator=authenticator
+    )
+    tone_analyzer.set_service_url('https://api.us-south.tone-analyzer.watson.cloud.ibm.com/instances/421d8d20-ab81-4291-a7ba-0e37f6cbf9de')
     try:
         resp = tone_analyzer.tone(
             {'text': raw_text},

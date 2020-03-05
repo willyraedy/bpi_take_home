@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 NEWS_API_KEY = os.environ['NEWS_API_KEY']
@@ -58,9 +59,8 @@ def fetch_full_text(url):
     Returns:
         Full text record including the url, the full text, and any DiffBot tags
     """
-    diff_test_resp = requests.get(f'https://api.diffbot.com/v3/article?url={url}&token={DIFF_BOT_API_KEY}')
-    print(diff_test_resp.status_code)
-    diff_bot_results = diff_test_resp.json()
+    diff_resp = requests.get(f'https://api.diffbot.com/v3/article?url={url}&token={DIFF_BOT_API_KEY}')
+    diff_bot_results = diff_resp.json()
     objects = diff_bot_results.get('objects')
     if objects and objects[0]:
         return {
