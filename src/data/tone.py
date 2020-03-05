@@ -31,14 +31,17 @@ def get(raw):
     except Exception as e:
         return {'error': e}
 
-def extract_score(raw_tone, tone_id):
-    if not raw_tone.get('document_tone'):
-        return np.nan
-
-    tones = raw_tone.get('document_tone').get('tones')
+def extract_score_from_tones(tones, tone_id):
     matching_tones = [t for t in tones if t['tone_id'] == tone_id]
 
     if not matching_tones:
         return np.nan
 
     return matching_tones[0]['score']
+
+def extract_score(raw_tone, tone_id):
+    if not raw_tone.get('document_tone'):
+        return np.nan
+
+    tones = raw_tone.get('document_tone').get('tones')
+    return extract_score_from_tones(tones, tone_id)
