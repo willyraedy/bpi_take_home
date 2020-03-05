@@ -1,4 +1,6 @@
 import requests
+import pandas as pd
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -50,3 +52,28 @@ def fetch_full_text(url):
       'text': '',
       'tags': []
       }
+
+def fetch_articles_for_date(query, date, sources):
+    url = 'http://newsapi.org/v2/everything?' +\
+          f'q={query}' +\
+          f'&apiKey={NEWS_API_KEY}' +\
+          '&language=en' +\
+          f'&sources={",".join(sources)}' +\
+          '&sortBy=populatiry' +\
+          '&pageSize=100' +\
+          f'&from={date}&to={date}'
+    res = requests.get(url)
+    articles = res.json()['articles']
+    return [{**a, 'query': query } for a in articles]
+
+def fetch_for_range(query, start_date, end_date):
+    sources = get_source_list()
+    articles = []
+    end = pd.to_datetime(end_date)
+    curr_date = pd.to_datetime(start_date)
+    while curr_date < end:
+        date_query = curr_date.strftime("%m/%d/%Y")
+        new_articles = fetch_articles_for_date(query, date_query, sources)
+        articles += [format_article(a) for a in new_articles]
+        curr_date = curr_date + timedelta(days=1)
+    return articles
