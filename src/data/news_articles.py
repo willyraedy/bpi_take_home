@@ -29,6 +29,18 @@ def get_source_list():
     return [x['id'] for x in res_sources.json()['sources']]
 
 def fetch_for_candidates(cand_names):
+    """
+    Fetch articles from News API for given list of candidates. New API is limited
+    to articles within one month of current day and only 100 results per
+    request. Queries each candidate's name and retrieves up to 100 articles
+    for each candidate.
+
+    Args:
+        cand_names (list): List of candidate names
+
+    Returns:
+        List of article objects.
+    """
     sources = get_source_list()
     articles = []
     for cand_name in cand_names:
@@ -37,21 +49,30 @@ def fetch_for_candidates(cand_names):
     return articles
 
 def fetch_full_text(url):
-  diff_test_resp = requests.get(f'https://api.diffbot.com/v3/article?url={url}&token={DIFF_BOT_API_KEY}')
-  print(diff_test_resp.status_code)
-  diff_bot_results = diff_test_resp.json()
-  objects = diff_bot_results.get('objects')
-  if objects and objects[0]:
+    """
+    Fetch full text of an article using DiffBot
+
+    Args:
+        url (str): URL of the article
+
+    Returns:
+        Full text record including the url, the full text, and any DiffBot tags
+    """
+    diff_test_resp = requests.get(f'https://api.diffbot.com/v3/article?url={url}&token={DIFF_BOT_API_KEY}')
+    print(diff_test_resp.status_code)
+    diff_bot_results = diff_test_resp.json()
+    objects = diff_bot_results.get('objects')
+    if objects and objects[0]:
+        return {
+        'url': url,
+        'text': objects[0].get('text'),
+        'tags': objects[0].get('tags')
+        }
     return {
-      'url': url,
-      'text': objects[0].get('text'),
-      'tags': objects[0].get('tags')
-      }
-  return {
-      'url': url,
-      'text': '',
-      'tags': []
-      }
+        'url': url,
+        'text': '',
+        'tags': []
+        }
 
 def fetch_articles_for_date(query, date, sources):
     url = 'http://newsapi.org/v2/everything?' +\
@@ -67,6 +88,20 @@ def fetch_articles_for_date(query, date, sources):
     return [{**a, 'query': query } for a in articles]
 
 def fetch_for_range(query, start_date, end_date):
+    """
+    Fetch articles from News API for given date range. New API is limited
+    to articles within one month of current day and only 100 results per
+    request. Makes a daily request retreiving up to 100 articles for each day
+    in range.
+
+    Args:
+        query (str): Query string to search for news articles
+        start_date (str): Starting date of range
+        end_date (str): End date of range
+
+    Returns:
+        List of article objects.
+    """
     sources = get_source_list()
     articles = []
     end = pd.to_datetime(end_date)
